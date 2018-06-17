@@ -1,10 +1,9 @@
 package io.membo.web.client.convert;
 
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 public interface Converter<T, R> {
-   R convert(T from);
-   List<R> convert(List<T> from);
+    R convert(T from);
+
+    List<R> convert(List<T> from);
 }
