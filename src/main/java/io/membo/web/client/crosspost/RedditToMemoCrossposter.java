@@ -15,61 +15,61 @@ import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
 import io.membo.web.client.transaction.create.TransactionCreationException;
 
 public class RedditToMemoCrossposter implements Crossposter {
-	private MemoSubmitter submitter;
-	private final RedditRssFetcher redditRssFetcher;
+    private MemoSubmitter submitter;
+    private final RedditRssFetcher redditRssFetcher;
 
-	final private Set<Post> submitted;
-	private Set<Post> blackListed = new HashSet<>();
+    final private Set<Post> submitted;
+    private Set<Post> blackListed = new HashSet<>();
 
-	@Autowired
-	private PostsDiffer postsDiffer;
+    @Autowired
+    private PostsDiffer postsDiffer;
 
-	@Autowired
-	private PostsRepository postsRepository;
+    @Autowired
+    private PostsRepository postsRepository;
 
-	public RedditToMemoCrossposter(MemoSubmitter submitter, RedditRssFetcher redditRssFetcher) {
-		this.submitter = submitter;
-		this.redditRssFetcher = redditRssFetcher;
-		submitted = new HashSet<>(postsRepository.findAll());
-	}
+    public RedditToMemoCrossposter(MemoSubmitter submitter, RedditRssFetcher redditRssFetcher) {
+        this.submitter = submitter;
+        this.redditRssFetcher = redditRssFetcher;
+        submitted = new HashSet<>(postsRepository.findAll());
+    }
 
-	@Override
-	public void crosspostAllForever(int minutesDelay) throws RssFetchingException, InterruptedException,
-			TransactionBroadcastException, TransactionCreationException {
-		crosspostRepeatedly(-1, minutesDelay);
-	}
+    @Override
+    public void crosspostAllForever(int minutesDelay) throws RssFetchingException, InterruptedException,
+            TransactionBroadcastException, TransactionCreationException {
+        crosspostRepeatedly(-1, minutesDelay);
+    }
 
-	@Override
-	public void crosspostAll(int cycles, int minutesDelay) throws InterruptedException, RssFetchingException,
-			TransactionBroadcastException, TransactionCreationException {
-		if (cycles < 1) {
-			throw new RuntimeException("The number of cycles should be a positive number: " + cycles);
-		}
+    @Override
+    public void crosspostAll(int cycles, int minutesDelay) throws InterruptedException, RssFetchingException,
+            TransactionBroadcastException, TransactionCreationException {
+        if (cycles < 1) {
+            throw new RuntimeException("The number of cycles should be a positive number: " + cycles);
+        }
 
-		crosspostRepeatedly(cycles, minutesDelay);
-	}
+        crosspostRepeatedly(cycles, minutesDelay);
+    }
 
-	private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException, RssFetchingException,
-			TransactionBroadcastException, TransactionCreationException {
-		for (int i = 0; i != repeat; ++i) {
-			crosspostAll();
-			Thread.sleep(1000 * 60 * minutesDelay);
-		}
-	}
+    private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException, RssFetchingException,
+            TransactionBroadcastException, TransactionCreationException {
+        for (int i = 0; i != repeat; ++i) {
+            crosspostAll();
+            Thread.sleep(1000 * 60 * minutesDelay);
+        }
+    }
 
-	private void crosspostAll()
-			throws RssFetchingException, TransactionBroadcastException, TransactionCreationException {
-		final Set<Post> newPosts = postsDiffer.getNewPosts(submitted, redditRssFetcher.fetch());
-		for (Post post : newPosts) {
-			crosspostPost(post);
-		}
-	}
+    private void crosspostAll()
+            throws RssFetchingException, TransactionBroadcastException, TransactionCreationException {
+        final Set<Post> newPosts = postsDiffer.getNewPosts(submitted, redditRssFetcher.fetch());
+        for (Post post : newPosts) {
+            crosspostPost(post);
+        }
+    }
 
-	private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
-		if (! submitted.contains(post) && !blackListed.contains(post)) {
-			submitter.submit(post);
-			submitted.add(post);
-			postsRepository.save(post);
-		}
-	}
+    private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
+        if (! submitted.contains(post) && !blackListed.contains(post)) {
+            submitter.submit(post);
+            submitted.add(post);
+            postsRepository.save(post);
+        }
+    }
 }

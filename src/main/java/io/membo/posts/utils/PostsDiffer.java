@@ -13,9 +13,9 @@ import io.membo.web.client.rss.Post;
 
 @Component
 public class PostsDiffer {
-	public final Set<Post> getNewPosts(final Set<Post> posts, final List<Post> fetchedPosts) {
-		Set<Post> postsCopy = new HashSet<>(posts);
-		postsCopy.removeAll(fetchedPosts);
-		return unmodifiableSet(postsCopy);
-	}
+    public final Set<Post> getNewPosts(final Set<Post> posts, final List<Post> fetchedPosts) {
+        Set<Post> postsCopy = new HashSet<>(posts);
+        postsCopy.removeAll(fetchedPosts);
+        return unmodifiableSet(postsCopy);
+    }
 }
