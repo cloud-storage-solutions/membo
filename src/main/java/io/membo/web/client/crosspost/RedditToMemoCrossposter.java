@@ -1,7 +1,6 @@
 package io.membo.web.client.crosspost;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class RedditToMemoCrossposter implements Crossposter {
 	private final RedditRssFetcher redditRssFetcher;
 
 	final private Set<Post> submitted;
-	private Set<Post> filtered = new HashSet<>();
+	private Set<Post> blackListed = new HashSet<>();
 
 	@Autowired
 	private PostsDiffer postsDiffer;
@@ -58,22 +57,19 @@ public class RedditToMemoCrossposter implements Crossposter {
 		}
 	}
 
-	// metod 42smisulutNaJivota
 	private void crosspostAll()
 			throws RssFetchingException, TransactionBroadcastException, TransactionCreationException {
-		List<Post> posts = redditRssFetcher.fetch();
-		final Set<Post> newPosts = postsDiffer.getNewPosts(submitted, new HashSet<>(posts));
-		postsRepository.saveAll(newPosts);
-
-		for (Post post : posts) {
+		final Set<Post> newPosts = postsDiffer.getNewPosts(submitted, redditRssFetcher.fetch());
+		for (Post post : newPosts) {
 			crosspostPost(post);
 		}
 	}
 
 	private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
-		if (!submitted.contains(post) && !filtered.contains(post)) {
+		if (! submitted.contains(post) && !blackListed.contains(post)) {
 			submitter.submit(post);
 			submitted.add(post);
+			postsRepository.save(post);
 		}
 	}
 }
