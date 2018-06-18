@@ -1,5 +1,13 @@
 package io.membo.web.client.crosspost;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.membo.posts.utils.PostsDiffer;
+import io.membo.repositories.PostsRepository;
 import io.membo.web.client.crosspost.submit.memo.MemoSubmitter;
 import io.membo.web.client.rss.Post;
 import io.membo.web.client.rss.RssFetchingException;
@@ -7,59 +15,65 @@ import io.membo.web.client.rss.reddit.RedditRssFetcher;
 import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
 import io.membo.web.client.transaction.create.TransactionCreationException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class RedditToMemoCrossposter implements Crossposter {
-    private MemoSubmitter submitter;
-    private final RedditRssFetcher redditRssFetcher;
+	private MemoSubmitter submitter;
+	private final RedditRssFetcher redditRssFetcher;
 
-    private Set<Post> submitted = new HashSet<>();
-    private Set<Post> filtered = new HashSet<>();
+	final private Set<Post> submitted;
+	private Set<Post> filtered = new HashSet<>();
 
-    public RedditToMemoCrossposter(MemoSubmitter submitter, RedditRssFetcher redditRssFetcher) {
-        this.submitter = submitter;
-        this.redditRssFetcher = redditRssFetcher;
-    }
+	@Autowired
+	private PostsDiffer postsDiffer;
 
-    @Override
-    public void crosspostAllForever(int minutesDelay) throws RssFetchingException, InterruptedException,
-            TransactionBroadcastException, TransactionCreationException {
-        crosspostRepeatedly(-1, minutesDelay);
-    }
+	@Autowired
+	private PostsRepository postsRepository;
 
-    @Override
-    public void crosspostAll(int cycles, int minutesDelay) throws InterruptedException, RssFetchingException,
-            TransactionBroadcastException, TransactionCreationException {
-        if (cycles < 1) {
-            throw new RuntimeException("The number of cycles should be a positive number: " + cycles);
-        }
+	public RedditToMemoCrossposter(MemoSubmitter submitter, RedditRssFetcher redditRssFetcher) {
+		this.submitter = submitter;
+		this.redditRssFetcher = redditRssFetcher;
+		submitted = new HashSet<>(postsRepository.findAll());
+	}
 
-        crosspostRepeatedly(cycles, minutesDelay);
-    }
+	@Override
+	public void crosspostAllForever(int minutesDelay) throws RssFetchingException, InterruptedException,
+			TransactionBroadcastException, TransactionCreationException {
+		crosspostRepeatedly(-1, minutesDelay);
+	}
 
-    private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException, RssFetchingException,
-            TransactionBroadcastException, TransactionCreationException {
-        for (int i = 0; i != repeat; ++i) {
-            crosspostAll();
-            Thread.sleep(1000 * 60 * minutesDelay);
-        }
-    }
+	@Override
+	public void crosspostAll(int cycles, int minutesDelay) throws InterruptedException, RssFetchingException,
+			TransactionBroadcastException, TransactionCreationException {
+		if (cycles < 1) {
+			throw new RuntimeException("The number of cycles should be a positive number: " + cycles);
+		}
 
-    private void crosspostAll() throws RssFetchingException, TransactionBroadcastException,
-            TransactionCreationException {
-        List<Post> posts = redditRssFetcher.fetch();
+		crosspostRepeatedly(cycles, minutesDelay);
+	}
 
-        for (Post post : posts) {
-            crosspostPost(post);
-        }
-    }
+	private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException, RssFetchingException,
+			TransactionBroadcastException, TransactionCreationException {
+		for (int i = 0; i != repeat; ++i) {
+			crosspostAll();
+			Thread.sleep(1000 * 60 * minutesDelay);
+		}
+	}
 
-    private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
-        if (!submitted.contains(post) && !filtered.contains(post)) {
-            submitter.submit(post);
-            submitted.add(post);
-        }
-    }
+	// metod 42smisulutNaJivota
+	private void crosspostAll()
+			throws RssFetchingException, TransactionBroadcastException, TransactionCreationException {
+		List<Post> posts = redditRssFetcher.fetch();
+		final Set<Post> newPosts = postsDiffer.getNewPosts(submitted, new HashSet<>(posts));
+		postsRepository.saveAll(newPosts);
+
+		for (Post post : posts) {
+			crosspostPost(post);
+		}
+	}
+
+	private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
+		if (!submitted.contains(post) && !filtered.contains(post)) {
+			submitter.submit(post);
+			submitted.add(post);
+		}
+	}
 }
