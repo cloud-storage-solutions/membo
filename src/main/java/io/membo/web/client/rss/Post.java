@@ -1,5 +1,7 @@
 package io.membo.web.client.rss;
 
+import com.rometools.utils.Strings;
+
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -75,20 +77,20 @@ public class Post {
 		return url.hashCode();
 	}
 
-	public String toMemoPost() { // TODO: move out
+	public String toMemoPost() throws Exception { // TODO: move out
 		final int MAX_MEMO_LENGTH = 75;
-		final String DELIMITER = "\n";
+		final String DELIMITER = "\\n";
 
-		if (Objects.equals(shortUrl, "")) {
-			shortUrl = url;
-		}
+        if (Strings.isEmpty(shortUrl)) {
+            shortUrl = url;
+        }
 
 		if (shortUrl.length() > MAX_MEMO_LENGTH) {
-			throw new RuntimeException("Url length (" + shortUrl.length() + ") is greater than max memo length ("
-					+ MAX_MEMO_LENGTH + ").");
+			throw new Exception("Url length (" + shortUrl.length() + ") is greater than max memo length ("
+					+ MAX_MEMO_LENGTH + ")."); // TODO: use a better exception
 		}
 
-		final String shortTitle = title.substring(0,
+		String shortTitle = title.substring(0,
 				Math.min(title.length(), MAX_MEMO_LENGTH - DELIMITER.length() - shortUrl.length()));
 		return shortTitle + DELIMITER + shortUrl;
 	}

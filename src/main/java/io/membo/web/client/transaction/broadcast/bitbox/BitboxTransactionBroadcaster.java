@@ -7,11 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+@Component
 public class BitboxTransactionBroadcaster implements TransactionBroadcaster {
     private final String BITBOX_ENDPOINT = "https://rest.bitbox.earth/v1/rawtransactions/sendRawTransaction/";
 
@@ -38,7 +40,10 @@ public class BitboxTransactionBroadcaster implements TransactionBroadcaster {
     }
 
     private boolean isResponseATxId(String response) {
-        final int TX_ID_LENGTH = 64;
+        final int QUOTES_LENGTH = 2;
+        final int HEX_LENGTH = 64;
+        final int TX_ID_LENGTH = HEX_LENGTH + QUOTES_LENGTH;
+
         return response.length() == TX_ID_LENGTH &&
                 !response.contains(" ");
     }

@@ -28,3 +28,6 @@
 *.swp
 *.swo
 
+### LuboKKanev
+ProcessMemoTransactionCreator.java
+

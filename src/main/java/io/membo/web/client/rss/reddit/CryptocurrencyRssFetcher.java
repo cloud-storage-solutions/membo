@@ -6,6 +6,6 @@ import io.membo.web.client.rss.Post;
 
 public class CryptocurrencyRssFetcher extends RedditRssFetcher {
     public CryptocurrencyRssFetcher(Converter<SyndEntry, Post> converter) {
-        super(converter, "https://www.reddit.com/r/cryptocurrency/.rss");
+        super("https://www.reddit.com/r/cryptocurrency/.rss");
     }
 }

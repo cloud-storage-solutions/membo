@@ -53,25 +53,20 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.197</version>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <version>RELEASE</version>
         </dependency>
-        <!--        <dependency>
-                    <groupId>net.swisstech</groupId>
-                    <artifactId>bitly-api-client</artifactId>
-                    <version>...</version>
-                </dependency>-->
+        <dependency>
+            <groupId>net.swisstech</groupId>
+            <artifactId>bitly-api-client</artifactId>
+            <version>0.8.0</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
-
-    <!--    <repository>
-            <id>central</id>
-            <name>bintray</name>
-            <url>http://jcenter.bintray.com</url>
-        </repository>-->
 
     <build>
         <plugins>
@@ -81,6 +76,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

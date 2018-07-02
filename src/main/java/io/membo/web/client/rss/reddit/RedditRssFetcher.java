@@ -9,6 +9,8 @@ import io.membo.web.client.convert.Converter;
 import io.membo.web.client.rss.Post;
 import io.membo.web.client.rss.RssFetcher;
 import io.membo.web.client.rss.RssFetchingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,10 +18,10 @@ import java.util.List;
 
 public class RedditRssFetcher implements RssFetcher {
     private final String rssUrl;
-    private final Converter<SyndEntry, Post> converter;
+    @Autowired
+    private Converter<SyndEntry, Post> converter;
 
-    public RedditRssFetcher(Converter<SyndEntry, Post> converter, String rssUrl) {
-        this.converter = converter;
+    public RedditRssFetcher(String rssUrl) {
         this.rssUrl = rssUrl;
     }
 
