@@ -64,7 +64,7 @@ public class RedditToMemoCrossposter implements Crossposter {
 
     private void crosspostAll()
             throws RssFetchingException, TransactionBroadcastException, TransactionCreationException, InterruptedException {
-        final List<Post> newPosts = redditRssFetcher.fetch();
+        List<Post> newPosts = redditRssFetcher.fetch();
         newPosts.removeAll(submitted);
 //        newPosts.removeAll(blacklisted);
 

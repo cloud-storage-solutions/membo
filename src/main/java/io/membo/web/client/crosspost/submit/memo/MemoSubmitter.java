@@ -31,7 +31,7 @@ public class MemoSubmitter implements Submitter {
             try {
                 int secondsToSleep = 10;
                 System.out.println("Retrying to submit post in " + secondsToSleep + " seconds ...");
-                Thread.sleep(secondsToSleep);
+                Thread.sleep(1000 * secondsToSleep);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

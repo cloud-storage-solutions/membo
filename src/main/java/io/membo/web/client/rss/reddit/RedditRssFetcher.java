@@ -32,7 +32,7 @@ public class RedditRssFetcher implements RssFetcher {
 
             return converter.convert(feed.getEntries());
         } catch (FeedException | IOException e) {
-            throw new RssFetchingException("There was a problem while fetching the rss content", e);
+            throw new RssFetchingException("There was a problem while fetching the RSS content", e);
         }
     }
 }
