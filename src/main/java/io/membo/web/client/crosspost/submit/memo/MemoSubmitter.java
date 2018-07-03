@@ -25,20 +25,36 @@ public class MemoSubmitter implements Submitter {
     public void submit(Post post) throws TransactionBroadcastException, TransactionCreationException {
         for (int i = 0; i < 3; ++i) {
             if (submitSuccessful(post)) {
-                break;
+                return;
+            }
+
+            try {
+                int secondsToSleep = 10;
+                System.out.println("Retrying to submit post in " + secondsToSleep + " seconds ...");
+                Thread.sleep(secondsToSleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
+        throw new TransactionBroadcastException("Failed to submit post: " + post.getUrl());
     }
 
     private boolean submitSuccessful(Post post) throws TransactionBroadcastException, TransactionCreationException {
         try {
-            transactionBroadcaster.broadcastTransaction(
-                    memoTransactionCreator.createTransaction(
-                            post.toMemoPost()));
+            String memoContent = post.toMemoPost();
+            System.out.println("Memo content: " + memoContent);
+
+            String transaction = memoTransactionCreator.createTransaction(memoContent);
+            System.out.println("Transaction: " + transaction);
+
+            transactionBroadcaster.broadcastTransaction(transaction);
         } catch (ServiceDownException e) {
+            e.printStackTrace();
             return false;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
 
         return true;

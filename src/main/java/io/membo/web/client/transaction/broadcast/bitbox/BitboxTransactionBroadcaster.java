@@ -28,7 +28,7 @@ public class BitboxTransactionBroadcaster implements TransactionBroadcaster {
 
             if (!isBroadcastSuccessful(exchange)) {
                 throw new InvalidTransactionException(
-                        "Transaction broadcasting failed. Probably the the transaction is invalid: " + txHex);
+                        "Transaction broadcasting failed. Probably the transaction is invalid: " + txHex);
             }
         } catch (URISyntaxException e) {
             throw new ServiceDownException("The bitbox endpoint is down at the moment. Try again later.", e);

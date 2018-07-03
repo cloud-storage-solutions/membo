@@ -7,6 +7,7 @@ import io.membo.web.client.rss.RssFetchingException;
 import io.membo.web.client.rss.reddit.RedditRssFetcher;
 import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
 import io.membo.web.client.transaction.create.TransactionCreationException;
+import org.hibernate.boot.jaxb.SourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,33 +46,44 @@ public class RedditToMemoCrossposter implements Crossposter {
             throw new RuntimeException("The number of cycles should be a positive number: " + cycles);
         }
 
-        submitted = new HashSet<>(postsRepository.findAll());
-//        blacklisted = new HashSet<>(blacklistedPostsRepository.findAll());
         crosspostRepeatedly(cycles, minutesDelay);
     }
 
     private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException, RssFetchingException,
             TransactionBroadcastException, TransactionCreationException {
+        submitted = new HashSet<>(postsRepository.findAll());
+//        blacklisted = new HashSet<>(blacklistedPostsRepository.findAll());
+
         for (int i = 0; i != repeat; ++i) {
             crosspostAll();
+
+            System.out.println("Sleeping for " + minutesDelay + " minute(s), before checking for new posts...");
             Thread.sleep(1000 * 60 * minutesDelay);
         }
     }
 
     private void crosspostAll()
-            throws RssFetchingException, TransactionBroadcastException, TransactionCreationException {
+            throws RssFetchingException, TransactionBroadcastException, TransactionCreationException, InterruptedException {
         final List<Post> newPosts = redditRssFetcher.fetch();
         newPosts.removeAll(submitted);
 //        newPosts.removeAll(blacklisted);
 
         for (Post post : newPosts) {
             crosspostPost(post);
+
+            int secondsToSleep = 10;
+            System.out.println("Sleeping for " + secondsToSleep + " seconds, before crossposting the next post...");
+            Thread.sleep(1000 * secondsToSleep);
         }
     }
 
     private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
-        submitter.submit(post);
-        submitted.add(post);
-        postsRepository.save(post);
+        try {
+            submitter.submit(post);
+            submitted.add(post);
+            postsRepository.save(post);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
