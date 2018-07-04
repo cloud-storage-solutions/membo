@@ -21,7 +21,8 @@ public class RssEntryToPostConverter implements Converter<SyndEntry, Post> {
 
     @Override
     public Post convert(SyndEntry entry) {
-        return new Post(entry.getTitle(), entry.getLink(), urlShortener.shorten(entry.getLink()));
+        String title = entry.getTitle().replaceAll("'", "\\\\'");
+        return new Post(title, entry.getLink(), urlShortener.shorten(entry.getLink()));
     }
 
     @Override
