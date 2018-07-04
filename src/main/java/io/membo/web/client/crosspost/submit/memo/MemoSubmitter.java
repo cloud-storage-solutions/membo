@@ -29,6 +29,10 @@ public class MemoSubmitter implements Submitter {
             }
 
             try {
+                String newTitle = post.getUrl().substring(45)
+                        .replaceAll("_", " ")
+                        .replaceAll("/", "");
+                post.setTitle(newTitle);
                 int secondsToSleep = 10;
                 System.out.println("Retrying to submit post in " + secondsToSleep + " seconds ...");
                 Thread.sleep(1000 * secondsToSleep);
