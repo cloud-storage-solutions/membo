@@ -68,12 +68,9 @@ public class RedditToMemoCrossposter implements Crossposter {
         newPosts.removeAll(submitted);
 //        newPosts.removeAll(blacklisted);
 
+        System.out.println("There are " + newPosts.size() + " new posts to submit.");
         for (Post post : newPosts) {
             crosspostPost(post);
-
-            int secondsToSleep = 10;
-            System.out.println("Sleeping for " + secondsToSleep + " seconds, before crossposting the next post...");
-            Thread.sleep(1000 * secondsToSleep);
         }
     }
 

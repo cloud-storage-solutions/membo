@@ -79,7 +79,7 @@ public class Post {
 
 	public String toMemoPost() throws Exception { // TODO: move out
 		final int MAX_MEMO_LENGTH = 75;
-		final String DELIMITER = "\\n";
+		final String DELIMITER = "..\\n"; //…
 
         if (Strings.isEmpty(shortUrl)) {
             shortUrl = url;

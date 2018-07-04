@@ -11,4 +11,3 @@ public class BtcRssFetcher extends RedditRssFetcher {
         super("https://www.reddit.com/r/btc/.rss");
     }
 }
-

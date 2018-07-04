@@ -1,7 +1,7 @@
 package io.membo.web.client.convert;
 
 import com.rometools.rome.feed.synd.SyndEntry;
-import io.membo.web.client.crosspost.UrlShortener;
+import io.membo.web.client.crosspost.RedditUrlShortener;
 import io.membo.web.client.rss.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,17 +12,17 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class RssEntryToPostConverter implements Converter<SyndEntry, Post> {
-    private final UrlShortener urlShortener;
+    private final RedditUrlShortener redditUrlShortener;
 
     @Autowired
-    public RssEntryToPostConverter(UrlShortener urlShortener) {
-        this.urlShortener = urlShortener;
+    public RssEntryToPostConverter(RedditUrlShortener redditUrlShortener) {
+        this.redditUrlShortener = redditUrlShortener;
     }
 
     @Override
     public Post convert(SyndEntry entry) {
         String title = entry.getTitle().replaceAll("'", "\\\\'");
-        return new Post(title, entry.getLink(), urlShortener.shorten(entry.getLink()));
+        return new Post(title, entry.getLink(), redditUrlShortener.shorten(entry.getLink()));
     }
 
     @Override
