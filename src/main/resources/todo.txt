@@ -1,0 +1,16 @@
+TODO:
+
+- logging
+    - maybe add a logging message prefix, while there's no better logging
+- heroku (docker?)
+- multiple subs
+    - r/soccer
+    - r/funny
+    - r/pics
+    - r/porn
+- multiple sites
+- longer messages
+- include upvotes, number of comments - maybe not included in the RSS
+- include pictures/videos
+- maybe remove the sleep between posts from a single fetch
+-
