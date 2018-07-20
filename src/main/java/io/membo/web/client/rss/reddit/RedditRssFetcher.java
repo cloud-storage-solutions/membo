@@ -6,7 +6,7 @@ import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import io.membo.web.client.convert.Converter;
-import io.membo.web.client.rss.Post;
+import io.membo.web.client.rss.RedditPost;
 import io.membo.web.client.rss.RssFetcher;
 import io.membo.web.client.rss.RssFetchingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +15,17 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class RedditRssFetcher implements RssFetcher {
+public class RedditRssFetcher implements RssFetcher<RedditPost> {
     private final String rssUrl;
     @Autowired
-    private Converter<SyndEntry, Post> converter;
+    private Converter<SyndEntry, RedditPost> converter;
 
-    public RedditRssFetcher(String rssUrl) {
+    public RedditRssFetcher(String rssUrl, Converter<SyndEntry, RedditPost> converter) {
         this.rssUrl = rssUrl;
+        this.converter = converter;
     }
 
-    public List<Post> fetch() throws RssFetchingException {
+    public List<RedditPost> fetch() throws RssFetchingException {
         SyndFeed feed = null;
 
         for (int i = 0; i < 3; ++i) {

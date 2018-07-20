@@ -1,8 +1,10 @@
 package io.membo.web.client.crosspost;
 
+import io.membo.repositories.BitdbRedditPostsRepository;
 import io.membo.repositories.PostsRepository;
 import io.membo.web.client.crosspost.submit.memo.MemoSubmitter;
 import io.membo.web.client.rss.Post;
+import io.membo.web.client.rss.RedditPost;
 import io.membo.web.client.rss.RssFetchingException;
 import io.membo.web.client.rss.reddit.RedditRssFetcher;
 import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
@@ -11,6 +13,7 @@ import org.hibernate.boot.jaxb.SourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,11 +24,11 @@ public class RedditToMemoCrossposter implements Crossposter {
     private final RedditRssFetcher redditRssFetcher;
     @Autowired
     private PostsRepository postsRepository;
-//    @Autowired
-//    private BlacklistedPostsRepository blacklistedPostsRepository;
+    private BitdbRedditPostsRepository bitdbPostsRepository = new BitdbRedditPostsRepository();
 
-    private Set<Post> submitted;
-    private Set<Post> blacklisted = new HashSet<>();
+    private Set<RedditPost> submitted;
+    private Set<RedditPost> blacklisted = new HashSet<>(Arrays.asList(
+            new RedditPost("Please read our Frequently Asked Questions (FAQ)", "", "http://redd.it/5wwznc", "5wwznc")));
 
     @Autowired
     public RedditToMemoCrossposter(MemoSubmitter submitter, RedditRssFetcher redditRssFetcher) {
@@ -51,10 +54,9 @@ public class RedditToMemoCrossposter implements Crossposter {
 
     private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException, RssFetchingException,
             TransactionBroadcastException, TransactionCreationException {
-        submitted = new HashSet<>(postsRepository.findAll());
-//        blacklisted = new HashSet<>(blacklistedPostsRepository.findAll());
+        submitted = new HashSet<>(bitdbPostsRepository.findAll());
 
-        for (int i = 0; i != repeat; ++i) {
+        for (long i = 0; i != repeat; ++i) {
             crosspostAll();
 
             System.out.println("Sleeping for " + minutesDelay + " minute(s), before checking for new posts...");
@@ -64,17 +66,17 @@ public class RedditToMemoCrossposter implements Crossposter {
 
     private void crosspostAll()
             throws RssFetchingException, TransactionBroadcastException, TransactionCreationException, InterruptedException {
-        List<Post> newPosts = redditRssFetcher.fetch();
+        List<RedditPost> newPosts = redditRssFetcher.fetch();
         newPosts.removeAll(submitted);
-//        newPosts.removeAll(blacklisted);
+        newPosts.removeAll(blacklisted);
 
         System.out.println("There are " + newPosts.size() + " new post(s) to submit.");
-        for (Post post : newPosts) {
+        for (RedditPost post : newPosts) {
             crosspostPost(post);
         }
     }
 
-    private void crosspostPost(Post post) throws TransactionBroadcastException, TransactionCreationException {
+    private void crosspostPost(RedditPost post) throws TransactionBroadcastException, TransactionCreationException {
         try {
             submitter.submit(post);
             submitted.add(post);

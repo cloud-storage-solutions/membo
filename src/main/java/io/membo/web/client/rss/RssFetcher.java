@@ -2,6 +2,6 @@ package io.membo.web.client.rss;
 
 import java.util.List;
 
-public interface RssFetcher {
-    List<Post> fetch() throws RssFetchingException;
+public interface RssFetcher<T extends Post> {
+    List<T> fetch() throws RssFetchingException;
 }
