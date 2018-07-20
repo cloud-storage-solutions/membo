@@ -23,6 +23,6 @@ public class MemboApplication {
 
     @PostConstruct
     public void init() throws InterruptedException, TransactionCreationException, RssFetchingException, TransactionBroadcastException {
-        crossposter.crosspostAllForever(10);
+        crossposter.crosspostAllForever(30);
     }
 }

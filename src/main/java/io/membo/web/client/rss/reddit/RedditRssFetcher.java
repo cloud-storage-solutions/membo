@@ -10,7 +10,6 @@ import io.membo.web.client.rss.Post;
 import io.membo.web.client.rss.RssFetcher;
 import io.membo.web.client.rss.RssFetchingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,13 +25,27 @@ public class RedditRssFetcher implements RssFetcher {
     }
 
     public List<Post> fetch() throws RssFetchingException {
-        try {
-            SyndFeedInput syndFeedInput = new SyndFeedInput();
-            SyndFeed feed = syndFeedInput.build(new XmlReader(new URL(rssUrl)));
+        SyndFeed feed = null;
 
-            return converter.convert(feed.getEntries());
-        } catch (FeedException | IOException e) {
-            throw new RssFetchingException("There was a problem while fetching the RSS content", e);
+        for (int i = 0; i < 3; ++i) {
+            try {
+                SyndFeedInput syndFeedInput = new SyndFeedInput();
+                feed = syndFeedInput.build(new XmlReader(new URL(rssUrl)));
+            } catch (FeedException | IOException e) {
+                if (i != 2) {
+                    int secondsToSleep = 30;
+                    System.out.println("Retrying to fetch RSS data in " + secondsToSleep + " seconds ...");
+                    try {
+                        Thread.sleep(1000 * secondsToSleep);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    throw new RssFetchingException("There was a problem while fetching the RSS content", e);
+                }
+            }
         }
+
+        return converter.convert(feed.getEntries());
     }
 }

@@ -4,6 +4,7 @@ import com.rometools.utils.Strings;
 
 import java.util.Objects;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -15,6 +16,7 @@ public class Post {
 	@Id
 	@GeneratedValue
 	private Long id;
+	@Column(length = 500)
 	private String title;
 	private String url;
 	private String shortUrl;

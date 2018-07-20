@@ -68,7 +68,7 @@ public class RedditToMemoCrossposter implements Crossposter {
         newPosts.removeAll(submitted);
 //        newPosts.removeAll(blacklisted);
 
-        System.out.println("There are " + newPosts.size() + " new posts to submit.");
+        System.out.println("There are " + newPosts.size() + " new post(s) to submit.");
         for (Post post : newPosts) {
             crosspostPost(post);
         }
