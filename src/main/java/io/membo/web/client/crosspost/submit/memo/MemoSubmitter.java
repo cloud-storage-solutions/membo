@@ -23,35 +23,35 @@ public class MemoSubmitter implements Submitter {
 
     @Override
     public void submit(Post post) throws TransactionBroadcastException, TransactionCreationException {
-        for (int i = 0; i < 3; ++i) {
-            if (submitSuccessful(post)) {
-                return;
-            }
-
-            try {
-                String newTitle = post.getUrl().substring(45)
-                        .replaceAll("_", " ")
-                        .replaceAll("/", "");
-                post.setTitle(newTitle);
-
-                int secondsToSleep = 10;
-                System.out.println("Retrying to submit post in " + secondsToSleep + " seconds ...");
-                Thread.sleep(1000 * secondsToSleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if (submitSuccessful(post)) {
+            return;
         }
 
-        throw new TransactionBroadcastException("Failed to submit post: " + post.getUrl());
+        try {
+            String newTitle = post.getUrl().substring(45)
+                  .replaceAll("_", " ")
+                  .replaceAll("/", "");
+            post.setTitle(newTitle);
+
+            int secondsToSleep = 10;
+            System.out.println("Retrying to submit post in " + secondsToSleep + " seconds ...");
+            Thread.sleep(1000 * secondsToSleep);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (!submitSuccessful(post)) {
+            throw new TransactionBroadcastException("Failed to submit post: " + post.getUrl());
+        }
     }
 
     private boolean submitSuccessful(Post post) throws TransactionBroadcastException, TransactionCreationException {
         try {
             String memoContent = post.toMemoPost();
-            System.out.println("Memo content: " + memoContent);
+            System.out.println("\nMemo content: " + memoContent);
 
             String transaction = memoTransactionCreator.createTransaction(memoContent);
-            System.out.println("Transaction: " + transaction);
+            System.out.println("Transaction hex: " + transaction);
 
             transactionBroadcaster.broadcastTransaction(transaction);
         } catch (ServiceDownException e) {

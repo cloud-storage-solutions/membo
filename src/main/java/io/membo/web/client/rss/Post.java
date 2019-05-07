@@ -80,7 +80,7 @@ public class Post {
 	}
 
 	public String toMemoPost() throws Exception { // TODO: move out
-		int MAX_MEMO_LENGTH = 75;
+		int MAX_MEMO_LENGTH = 74;
 		String DELIMITER = "\\n";
 		String DOTS = ".."; //…
 

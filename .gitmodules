@@ -1,0 +1,3 @@
+[submodule "bchmemo"]
+	path = bchmemo
+	url = ./bchmemo/

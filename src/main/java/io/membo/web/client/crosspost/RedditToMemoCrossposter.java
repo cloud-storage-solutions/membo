@@ -22,13 +22,10 @@ import java.util.Set;
 public class RedditToMemoCrossposter implements Crossposter {
     private final MemoSubmitter submitter;
     private final RedditRssFetcher redditRssFetcher;
-    @Autowired
-    private PostsRepository postsRepository;
+
     private BitdbRedditPostsRepository bitdbPostsRepository = new BitdbRedditPostsRepository();
 
     private Set<RedditPost> submitted;
-    private Set<RedditPost> blacklisted = new HashSet<>(Arrays.asList(
-            new RedditPost("Please read our Frequently Asked Questions (FAQ)", "", "http://redd.it/5wwznc", "5wwznc")));
 
     @Autowired
     public RedditToMemoCrossposter(MemoSubmitter submitter, RedditRssFetcher redditRssFetcher) {
@@ -68,7 +65,6 @@ public class RedditToMemoCrossposter implements Crossposter {
             throws RssFetchingException, TransactionBroadcastException, TransactionCreationException, InterruptedException {
         List<RedditPost> newPosts = redditRssFetcher.fetch();
         newPosts.removeAll(submitted);
-        newPosts.removeAll(blacklisted);
 
         System.out.println("There are " + newPosts.size() + " new post(s) to submit.");
         for (RedditPost post : newPosts) {
@@ -80,7 +76,6 @@ public class RedditToMemoCrossposter implements Crossposter {
         try {
             submitter.submit(post);
             submitted.add(post);
-            postsRepository.save(post);
         } catch (Exception e) {
             e.printStackTrace();
         }

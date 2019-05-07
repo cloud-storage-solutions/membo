@@ -3,35 +3,39 @@ package io.membo.web.client.transaction.broadcast.bitbox;
 import io.membo.web.client.transaction.broadcast.InvalidTransactionException;
 import io.membo.web.client.transaction.broadcast.ServiceDownException;
 import io.membo.web.client.transaction.broadcast.TransactionBroadcaster;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 @Component
 public class BitboxTransactionBroadcaster implements TransactionBroadcaster {
-    private final String BITBOX_ENDPOINT = "https://rest.bitbox.earth/v1/rawtransactions/sendRawTransaction/";
+    private final String BITBOX_ENDPOINT = "https://rest.bitcoin.com/v2/rawtransactions/sendRawTransaction/";
 
     @Override
     public void broadcastTransaction(String txHex) throws ServiceDownException, InvalidTransactionException {
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            RequestEntity<Void> build = RequestEntity.post(
-                    new URI(BITBOX_ENDPOINT + txHex))
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE).build();
-            ResponseEntity<String> exchange = restTemplate.exchange(build, String.class);
+        StringBuffer output = new StringBuffer();
 
-            if (!isBroadcastSuccessful(exchange)) {
-                throw new InvalidTransactionException(
-                        "Transaction broadcasting failed. Probably the transaction is invalid: " + txHex);
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec("curl -X GET \"" + BITBOX_ENDPOINT + txHex + "\" -H \"accept: */*\"");
+            p.waitFor();
+            BufferedReader reader =
+                  new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine())!= null) {
+                output.append(line).append("\n");
             }
-        } catch (URISyntaxException e) {
-            throw new ServiceDownException("The bitbox endpoint is down at the moment. Try again later.", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (!isResponseATxId(output.toString())) {
+            throw new InvalidTransactionException(
+                  "Transaction broadcasting failed. Probably the transaction is invalid. Transaction hex: " + txHex
+                        + ". \nBroadcast error: " + output.toString());
         }
     }
 
@@ -42,9 +46,9 @@ public class BitboxTransactionBroadcaster implements TransactionBroadcaster {
     private boolean isResponseATxId(String response) {
         final int QUOTES_LENGTH = 2;
         final int HEX_LENGTH = 64;
-        final int TX_ID_LENGTH = HEX_LENGTH + QUOTES_LENGTH;
+        final int NEW_LINE_LENGTH = 1;
+        final int TX_ID_LENGTH = HEX_LENGTH + QUOTES_LENGTH + NEW_LINE_LENGTH;
 
-        return response.length() == TX_ID_LENGTH &&
-                !response.contains(" ");
+        return response.length() == TX_ID_LENGTH && !response.contains(" ");
     }
 }
