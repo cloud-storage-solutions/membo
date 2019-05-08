@@ -18,6 +18,9 @@ public class Post {
 	private String title;
 	private String url;
 	private String shortUrl;
+	public static final int MAX_MEMO_LENGTH = 74;
+	public static final String DELIMITER = "\\n";
+	public static final String CUTOUT = "…";
 
 	public Post() {
 	}
@@ -78,11 +81,7 @@ public class Post {
 	}
 
 	public String toMemoPost() { // TODO: move out
-		int MAX_MEMO_LENGTH = 74;
-		String DELIMITER = "\\n";
-		String CUTOUT = "…"; //…
-
-        if (Strings.isEmpty(shortUrl)) {
+		if (Strings.isEmpty(shortUrl)) {
             shortUrl = url;
         }
 
@@ -93,7 +92,7 @@ public class Post {
 
 		String shortTitle = title;
 		int maxTitleLength = MAX_MEMO_LENGTH - DELIMITER.length() - shortUrl.length();
-		if (shortTitle.length() > maxTitleLength) {
+		if (title.length() > maxTitleLength) {
 			shortTitle = title.substring(0, maxTitleLength - CUTOUT.length()) + CUTOUT;
 		}
 

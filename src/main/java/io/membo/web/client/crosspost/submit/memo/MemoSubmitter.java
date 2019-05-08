@@ -52,9 +52,17 @@ public class MemoSubmitter implements Submitter {
     }
 
     private void simplifyPostName(Post post) {
-        String newTitle = post.getUrl().substring(45)
+        int startOfRedditUrlTitle = 45;
+        int redditMaxUrlTitle = 55;
+
+        String newTitle = post.getUrl().substring(startOfRedditUrlTitle)
               .replaceAll("_", " ")
               .replaceAll("/", "");
+
+        if (newTitle.length() > redditMaxUrlTitle) {
+            newTitle += Post.CUTOUT;
+        }
+
         post.setTitle(newTitle);
     }
 
