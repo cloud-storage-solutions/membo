@@ -6,8 +6,6 @@ import io.membo.web.client.rss.RedditPost;
 import io.membo.web.client.rss.RssFetchingException;
 import io.membo.web.client.rss.reddit.RedditRssFetcher;
 import io.membo.web.client.transaction.TransactionException;
-import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
-import io.membo.web.client.transaction.create.TransactionCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

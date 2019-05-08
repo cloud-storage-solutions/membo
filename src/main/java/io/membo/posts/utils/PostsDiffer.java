@@ -1,7 +1,6 @@
 package io.membo.posts.utils;
 
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.toSet;
 
 import java.util.HashSet;
 import java.util.List;
