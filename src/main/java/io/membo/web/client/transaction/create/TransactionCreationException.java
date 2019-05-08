@@ -1,6 +1,8 @@
 package io.membo.web.client.transaction.create;
 
-public class TransactionCreationException extends Exception {
+import io.membo.web.client.transaction.TransactionException;
+
+public class TransactionCreationException extends TransactionException {
     public TransactionCreationException() {
     }
 

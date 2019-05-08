@@ -1,5 +1,4 @@
 TODO:
-
 - logging
     - maybe add a logging message prefix, while there's no better logging
 - heroku (docker?)

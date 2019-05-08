@@ -79,7 +79,7 @@ public class Post {
 		return url.hashCode();
 	}
 
-	public String toMemoPost() throws Exception { // TODO: move out
+	public String toMemoPost() { // TODO: move out
 		int MAX_MEMO_LENGTH = 74;
 		String DELIMITER = "\\n";
 		String CUTOUT = "…"; //…
@@ -89,7 +89,7 @@ public class Post {
         }
 
 		if (shortUrl.length() > MAX_MEMO_LENGTH) {
-			throw new Exception("Url length (" + shortUrl.length() + ") is greater than max memo length ("
+			throw new RuntimeException("Url length (" + shortUrl.length() + ") is greater than max memo length ("
 					+ MAX_MEMO_LENGTH + ")."); // TODO: use a better exception
 		}
 

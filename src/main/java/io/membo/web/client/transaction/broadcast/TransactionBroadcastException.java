@@ -1,6 +1,8 @@
 package io.membo.web.client.transaction.broadcast;
 
-public class TransactionBroadcastException extends Exception {
+import io.membo.web.client.transaction.TransactionException;
+
+public class TransactionBroadcastException extends TransactionException {
     public TransactionBroadcastException() {
     }
 

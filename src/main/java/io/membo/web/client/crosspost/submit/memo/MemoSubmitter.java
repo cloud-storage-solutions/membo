@@ -2,7 +2,7 @@ package io.membo.web.client.crosspost.submit.memo;
 
 import io.membo.web.client.crosspost.submit.Submitter;
 import io.membo.web.client.rss.Post;
-import io.membo.web.client.transaction.broadcast.ServiceDownException;
+import io.membo.web.client.transaction.TransactionException;
 import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
 import io.membo.web.client.transaction.broadcast.TransactionBroadcaster;
 import io.membo.web.client.transaction.create.TransactionCreationException;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class MemoSubmitter implements Submitter {
     private final MemoTransactionCreator memoTransactionCreator;
     private final TransactionBroadcaster transactionBroadcaster;
+    private final int RETRY_DELAY_SECONDS = 10;
 
     @Autowired
     public MemoSubmitter(MemoTransactionCreator memoTransactionCreator, TransactionBroadcaster transactionBroadcaster) {
@@ -22,46 +23,48 @@ public class MemoSubmitter implements Submitter {
     }
 
     @Override
-    public void submit(Post post) throws TransactionBroadcastException, TransactionCreationException {
-        if (submitSuccessful(post)) {
-            return;
+    public void submit(Post post) throws TransactionException {
+        try {
+            doSubmit(post);
+        } catch (Exception e) {
+            e.printStackTrace();
+            retrySubmitWithSimplifiedName(post);
         }
+    }
+
+    private void retrySubmitWithSimplifiedName(Post post)
+          throws TransactionException {
+        simplifyPostName(post);
 
         try {
-            String newTitle = post.getUrl().substring(45)
-                  .replaceAll("_", " ")
-                  .replaceAll("/", "");
-            post.setTitle(newTitle);
-
-            int secondsToSleep = 10;
-            System.out.println("Retrying to submit post in " + secondsToSleep + " seconds ...");
-            Thread.sleep(1000 * secondsToSleep);
+            System.out
+                  .println("Retrying to submit post with simplified name in " + RETRY_DELAY_SECONDS + " seconds ...");
+            Thread.sleep(1000 * RETRY_DELAY_SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        if (!submitSuccessful(post)) {
-            throw new TransactionBroadcastException("Failed to submit post: " + post.getUrl());
+        try {
+            doSubmit(post);
+        } catch (Exception e) {
+            throw new TransactionException("Failed to submit post even with simplified name: " + post.getUrl(), e);
         }
     }
 
-    private boolean submitSuccessful(Post post) throws TransactionBroadcastException, TransactionCreationException {
-        try {
-            String memoContent = post.toMemoPost();
-            System.out.println("\nMemo content: " + memoContent);
+    private void simplifyPostName(Post post) {
+        String newTitle = post.getUrl().substring(45)
+              .replaceAll("_", " ")
+              .replaceAll("/", "");
+        post.setTitle(newTitle);
+    }
 
-            String transaction = memoTransactionCreator.createTransaction(memoContent);
-            System.out.println("Transaction hex: " + transaction);
+    private void doSubmit(Post post) throws TransactionBroadcastException, TransactionCreationException {
+        String memoContent = post.toMemoPost();
+        System.out.println("\nMemo content: " + memoContent);
 
-            transactionBroadcaster.broadcastTransaction(transaction);
-        } catch (ServiceDownException e) {
-            e.printStackTrace();
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        String transaction = memoTransactionCreator.createTransaction(memoContent);
+        System.out.println("Transaction hex: " + transaction);
 
-        return true;
+        transactionBroadcaster.broadcastTransaction(transaction);
     }
 }
