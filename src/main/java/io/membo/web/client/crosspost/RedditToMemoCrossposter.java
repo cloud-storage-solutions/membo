@@ -52,7 +52,11 @@ public class RedditToMemoCrossposter implements Crossposter {
                 e.printStackTrace();
             }
 
-            System.out.println("Sleeping for " + minutesDelay + " minute(s), before checking for new posts...");
+            if (minutesDelay == 1) {
+                System.out.println("Sleeping for a minute, before checking for new posts...");
+            } else {
+                System.out.println("Sleeping for " + minutesDelay + " minutes, before checking for new posts...");
+            }
             Thread.sleep(1000 * 60 * minutesDelay);
         }
     }
@@ -61,7 +65,12 @@ public class RedditToMemoCrossposter implements Crossposter {
         List<RedditPost> newPosts = redditRssFetcher.fetch();
         newPosts.removeAll(submitted);
 
-        System.out.println("There are " + newPosts.size() + " new post(s) to submit.");
+        if (newPosts.size() == 1) {
+            System.out.println("There is 1 new post to submit.");
+        } else {
+            System.out.println("There are " + newPosts.size() + " new posts to submit.");
+        }
+
         for (RedditPost post : newPosts) {
             try {
                 crosspostPost(post);
