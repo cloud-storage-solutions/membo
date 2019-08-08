@@ -16,16 +16,27 @@ public class ProcessMemoTransactionCreator implements MemoTransactionCreator {
    public String createTransaction(String memoContent) throws TransactionCreationException {
       String publicKey = "bitcoincash:" + Account.publicKey;
       String privateKey = Account.privateKey;
-      Process exec = createPythonProcess(memoContent, publicKey, privateKey);
+      Process exec = createPythonProcess(escapeSymbols(memoContent), publicKey, privateKey);
+
+      try {
+         exec.waitFor();
+      } catch (InterruptedException e) {
+         throw new TransactionCreationException(e);
+      }
 
       if (exec.exitValue() != 0) {
          String errorOutput = new BufferedReader(new InputStreamReader(exec.getErrorStream()))
-               .lines().collect(Collectors.joining("\n"));
-         throw new TransactionCreationException(errorOutput);
+                 .lines().collect(Collectors.joining("\n"));
+         throw new TransactionCreationException(
+                 "Failed to create Memo transaction with content: " + memoContent + ". " + errorOutput);
       }
 
       return new BufferedReader(new InputStreamReader(exec.getInputStream()))
             .lines().collect(Collectors.joining("\n"));
+   }
+
+   private String escapeSymbols(String memoContent) {
+      return memoContent; //.replaceAll(":", "\\\\:");
    }
 
    private Process createPythonProcess(String memoContent, String publicKey, String privateKey) throws TransactionCreationException {
@@ -42,7 +53,7 @@ public class ProcessMemoTransactionCreator implements MemoTransactionCreator {
                "user.private_key = '" + privateKey + "';" +
                "print(user.get_post_memo_signed_transaction('" + memoContent + "'))");
       } catch (IOException e) {
-         throw new TransactionCreationException("Failed to create Memo transaction.", e);
+         throw new TransactionCreationException("Failed to create Memo transaction with content: " + memoContent, e);
       }
    }
 }

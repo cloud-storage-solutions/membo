@@ -47,7 +47,7 @@ public class MemoSubmitter implements Submitter {
         try {
             doSubmit(post);
         } catch (Exception e) {
-            throw new TransactionException("Failed to submit post even with simplified name: " + post.getUrl(), e);
+            throw new TransactionException("Failed to submit post even with simplified name: " + post.getTitle(), e);
         }
     }
 
@@ -69,11 +69,8 @@ public class MemoSubmitter implements Submitter {
 
     private void doSubmit(Post post) throws TransactionBroadcastException, TransactionCreationException {
         String memoContent = post.toMemoPost();
-        System.out.println("\nMemo content: " + memoContent);
-
         String transaction = memoTransactionCreator.createTransaction(memoContent);
-        System.out.println("Transaction hex: " + transaction);
-
         transactionBroadcaster.broadcastTransaction(transaction);
+        System.out.println("\nMemo posted successfully: " + memoContent);
     }
 }

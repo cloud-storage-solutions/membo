@@ -90,12 +90,17 @@ public class Post {
 					+ MAX_MEMO_LENGTH + ")."); // TODO: use a better exception
 		}
 
-		String shortTitle = title;
+		String shortTitle = escapeSpecialSymbols(title);
 		int maxTitleLength = MAX_MEMO_LENGTH - DELIMITER.length() - shortUrl.length();
 		if (title.length() > maxTitleLength) {
 			shortTitle = title.substring(0, maxTitleLength - CUTOUT.length()) + CUTOUT;
 		}
 
 		return shortTitle + DELIMITER + shortUrl;
+	}
+
+	private String escapeSpecialSymbols(String title) {
+		return title.replaceAll("\"", "\\\"")
+				.replaceAll("'", "\\'");
 	}
 }
