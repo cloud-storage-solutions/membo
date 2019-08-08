@@ -5,9 +5,9 @@ import io.membo.web.client.transaction.broadcast.TransactionBroadcastException;
 import io.membo.web.client.transaction.create.TransactionCreationException;
 
 public interface Crossposter {
-    void crosspostAllForever(int minutesDelay) throws InterruptedException, RssFetchingException,
+    void crosspostAllForever(int minutesDelay, boolean dontPost) throws InterruptedException, RssFetchingException,
             TransactionBroadcastException, TransactionCreationException;
 
-    void crosspostAll(int cycles, int minutesDelay) throws InterruptedException, RssFetchingException,
+    void crosspostAll(int cycles, int minutesDelay, boolean dontPost) throws InterruptedException, RssFetchingException,
             TransactionBroadcastException, TransactionCreationException;
 }

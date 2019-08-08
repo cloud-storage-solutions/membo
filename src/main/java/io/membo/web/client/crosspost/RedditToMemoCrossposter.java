@@ -29,25 +29,25 @@ public class RedditToMemoCrossposter implements Crossposter {
     }
 
     @Override
-    public void crosspostAllForever(int minutesDelay) throws InterruptedException {
-        crosspostRepeatedly(-1, minutesDelay);
+    public void crosspostAllForever(int minutesDelay, boolean dontPost) throws InterruptedException {
+        crosspostRepeatedly(-1, minutesDelay, dontPost);
     }
 
     @Override
-    public void crosspostAll(int cycles, int minutesDelay) throws InterruptedException {
+    public void crosspostAll(int cycles, int minutesDelay, boolean dontPost) throws InterruptedException {
         if (cycles < 1) {
             throw new RuntimeException("The number of cycles should be a positive number: " + cycles);
         }
 
-        crosspostRepeatedly(cycles, minutesDelay);
+        crosspostRepeatedly(cycles, minutesDelay, dontPost);
     }
 
-    private void crosspostRepeatedly(int repeat, int minutesDelay) throws InterruptedException {
+    private void crosspostRepeatedly(int repeat, int minutesDelay, boolean dontPost) throws InterruptedException {
         submitted = new HashSet<>(bitdbPostsRepository.findAll());
 
         for (long i = 0; i != repeat; ++i) {
             try {
-                crosspostAll();
+                crosspostAll(dontPost);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -61,7 +61,7 @@ public class RedditToMemoCrossposter implements Crossposter {
         }
     }
 
-    private void crosspostAll() throws RssFetchingException {
+    private void crosspostAll(boolean dontPost) throws RssFetchingException {
         List<RedditPost> newPosts = redditRssFetcher.fetch();
         newPosts.removeAll(submitted);
 
@@ -73,15 +73,15 @@ public class RedditToMemoCrossposter implements Crossposter {
 
         for (RedditPost post : newPosts) {
             try {
-                crosspostPost(post);
+                crosspostPost(post, dontPost);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void crosspostPost(RedditPost post) throws TransactionException {
-        submitter.submit(post);
+    private void crosspostPost(RedditPost post, boolean dontPost) throws TransactionException {
+        submitter.submit(post, dontPost);
         submitted.add(post);
     }
 }

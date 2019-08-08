@@ -4,5 +4,5 @@ import io.membo.web.client.rss.Post;
 import io.membo.web.client.transaction.TransactionException;
 
 public interface Submitter {
-    void submit(Post post) throws TransactionException;
+    void submit(Post post, boolean dontPost) throws TransactionException;
 }

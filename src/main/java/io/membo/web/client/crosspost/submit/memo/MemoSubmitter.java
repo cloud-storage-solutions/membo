@@ -23,9 +23,9 @@ public class MemoSubmitter implements Submitter {
     }
 
     @Override
-    public void submit(Post post) throws TransactionException {
+    public void submit(Post post, boolean dontPost) throws TransactionException {
         try {
-            doSubmit(post);
+            doSubmit(post, dontPost);
         } catch (Exception e) {
             e.printStackTrace();
             retrySubmitWithSimplifiedName(post);
@@ -45,7 +45,7 @@ public class MemoSubmitter implements Submitter {
         }
 
         try {
-            doSubmit(post);
+            doSubmit(post, false);
         } catch (Exception e) {
             throw new TransactionException("Failed to submit post even with simplified name: " + post.getTitle(), e);
         }
@@ -67,10 +67,14 @@ public class MemoSubmitter implements Submitter {
         post.setTitle(newTitle);
     }
 
-    private void doSubmit(Post post) throws TransactionBroadcastException, TransactionCreationException {
+    private void doSubmit(Post post, boolean dontPost) throws TransactionBroadcastException, TransactionCreationException {
         String memoContent = post.toMemoPost();
-        String transaction = memoTransactionCreator.createTransaction(memoContent);
-        transactionBroadcaster.broadcastTransaction(transaction);
+
+        if (!dontPost) {
+            String transaction = memoTransactionCreator.createTransaction(memoContent);
+            transactionBroadcaster.broadcastTransaction(transaction);
+        }
+
         System.out.println("\nMemo posted successfully: " + memoContent);
     }
 }

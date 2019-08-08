@@ -9,7 +9,11 @@ import io.membo.web.client.transaction.broadcast.bitbox.BitboxTransactionBroadca
 
 public class MemboApplication {
     public static void main(String[] args) throws Exception {
-        int minutesDelay = args.length > 0 ? Integer.valueOf(args[0]) : 10;
+        int minutesDelay = args.length > 0 ? Integer.parseInt(args[0]) : 10;
+        boolean dontPost = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
+
+        if (dontPost)
+            System.out.println("WARNING: Won't be actually posting on the blockchain, just displaying the new posts!");
 
         new RedditToMemoCrossposter(
                 new MemoSubmitter(
@@ -18,6 +22,6 @@ public class MemboApplication {
                 new BtcRssFetcher(
                         new RssEntryToRedditPostConverter(
                                 new RedditUrlShortener())))
-                .crosspostAllForever(minutesDelay);
+                .crosspostAllForever(minutesDelay, dontPost);
     }
 }
