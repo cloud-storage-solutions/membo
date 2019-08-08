@@ -73,8 +73,9 @@ public class MemoSubmitter implements Submitter {
         if (!dontPost) {
             String transaction = memoTransactionCreator.createTransaction(memoContent);
             transactionBroadcaster.broadcastTransaction(transaction);
+            System.out.println("\nMemo posted successfully: " + memoContent);
+        } else {
+            System.out.println("\nPending post: " + memoContent);
         }
-
-        System.out.println("\nMemo posted successfully: " + memoContent);
     }
 }
