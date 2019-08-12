@@ -53,9 +53,9 @@ public class RedditToMemoCrossposter implements Crossposter {
             }
 
             if (minutesDelay == 1) {
-                System.out.println("Sleeping for a minute, before checking for new posts...");
+                System.out.println("Sleeping for a minute before checking for new posts...");
             } else {
-                System.out.println("Sleeping for " + minutesDelay + " minutes, before checking for new posts...");
+                System.out.println("Sleeping for " + minutesDelay + " minutes before checking for new posts...");
             }
             Thread.sleep(1000 * 60 * minutesDelay);
         }
